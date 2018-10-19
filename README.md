@@ -1,4 +1,8 @@
-# ai-challenger-plant-disease
+# Kaggle Plant Seeding Classification 比赛
+
+<div align=center>
+<img src='https://ws2.sinaimg.cn/large/006tNbRwly1fwdpjbncupj31i40ew0vk.jpg' width='500'>
+</div>
 
 ## 项目介绍
 
