@@ -20,7 +20,7 @@ from utils.create_data_lists import split_dataset
 from utils.lr_scheduler import LRScheduler
 from utils.meter import AverageValueMeter
 from utils.serialization import mkdir_if_missing, save_checkpoint
-
+from utils.layer_group import flatten_model
 
 def main():
     parser = argparse.ArgumentParser(description='model training')
@@ -48,6 +48,7 @@ def main():
     parser.add_argument('--save_step', type=int, default=20, help='save model every save_step')
 
     args = parser.parse_args()
+
     mkdir_if_missing(args.save_dir)
     log_path = os.path.join(args.save_dir, 'log.txt')
     with open(log_path, 'w') as f:
@@ -85,10 +86,12 @@ def main():
     valid_loader = DataLoader(validset, batch_size=args.test_bs, shuffle=False, num_workers=8, pin_memory=True)
 
     # define network
-    net = get_resnet50(len(label2name), pretrain=False)
+    net = get_resnet50(len(label2name), pretrain=True)
+    # layer_groups = [nn.Sequential(*flatten_model(net))]
 
     # define loss
     ce_loss = nn.CrossEntropyLoss()
+
 
     # define optimizer and lr scheduler
     if args.opt_func == 'Adam':
@@ -126,8 +129,7 @@ def train(args, network, train_data, valid_data, optimizer, criterion, lr_schedu
             param_group['lr'] = lr
         print_str = 'Epoch [%d] learning rate update to %.3e' % (epoch, lr)
         print(print_str)
-        with open(log_path, 'a') as f:
-            f.write(print_str + '\n')
+        with open(log_path, 'a') as f: f.write(print_str + '\n')
         tic = time.time()
         btic = time.time()
         for i, data in enumerate(train_data):
