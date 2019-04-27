@@ -31,4 +31,4 @@ def save_checkpoint(state, is_best, save_dir, filename='checkpoint.pth.tar'):
     mkdir_if_missing(save_dir)
     torch.save(state, fpath)
     if is_best:
-        shutil.copy(fpath, osp.join(save_dir, 'model_best.pth.tar'))
+        shutil.copy(fpath, osp.join(save_dir, 'model_best.pth'))
