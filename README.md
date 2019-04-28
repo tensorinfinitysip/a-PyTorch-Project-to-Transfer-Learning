@@ -76,14 +76,28 @@ $$
 在这个部分，我们展示一下整体的模型结构，如果你很熟悉这个部分，你可以直接跳到[implementation](https://github.com/L1aoXingyu/a-PyTorch-Tutorial-to-Transfer-Learning#implementation)
 
 ## Base Convolutions
-首先，我们使用目前存在的神经网络结构作为例子，这里我们使用 ResNet50。
+首先，我们使用目前存在的神经网络结构作为例子，这里我们使用 ResNet50 作为例子，也可以尝试使用不同的网络结构。
 
 <div align=center>
-<img src='assets/resnet.png' width='800'>
+<img src='assets/resnet.png' width='400'>
 </div>
 
+我们会保留完整的网络结构，除了最后一层，我们会用一个新的全连接层去替换最后一层，实现我们需要的分类效果。
+
+## Loss 函数
+对于分类问题，我们使用最常用的交叉熵损失函数，公式如下
+
+$$
+l_{CE} = - \sum_{i=1}^C t_i \log (y_i)
+$$
+
+其中 $y_i$ 是softmax之后的结果，$t_i$ 是 one-hot 的真实label。
+
+## 处理预测过程
+在网络的预测过程中，我们将图片输入到网络中，最后可以得到一个k-维向量，这个向量表示每个分类的得分，我们只需要取里面得分最大的下标作为预测的label即可，注意这里的向量每个元素求和并不等于1，如果要等于1，需要对向量进行softmax操作。
+
 # Implementation
-## 数据下载
+## 数据准备
 通过[比赛界面](https://www.kaggle.com/c/plant-seedlings-classification/data)根据图片中的显示进行数据下载
 
 <div align=center>
@@ -92,24 +106,58 @@ $$
 
 然后在项目的根目录中创建`datasets`文件夹，将下载好`train.zip`和`test.zip`文件放入`datasets`中
 
+里面一共有12种不同的植物信息
+```python
+{'Black-grass', 'Charlock', 'Cleavers', 'Common Chickweed', 'Common wheat', 'Fat He', 'Loose Silky-bent', 'Maize', 'Scentless Mayweed', 'Shepherds Purse', 'Small-flowered Cranesbill', 'Sugar beet'}
+```
+
+通过 `utils/create_data_lists.py` 中的函数，我们可以按照比例将有标注的图片分成训练集和验证集，他们都是以`list`的方式存在，每个元素包含着图片的路径和对应的label，同时会得到一个字典`label2name`，里面包含着`0 ~ 11`这 12 个数字分别对应的具体上面的标签。
+
+## 输入
+我们将图片都 resize 到 `224, 224` 作为网络的输入，同时每张图片的读入都是 RBG 的格式。
+
+接着我们通过一系列数据增广的操作，比如随机裁剪，随机翻转等等，更多的增广方法具体看一看`torchvision.transforms`中的函数。
+我们的数据增广定义在 `train.py` 中定义了`train_tfms`和`test_tfms`作为训练集和测试集的数据增广。
+`train_tfms`主要使用了`RandomResizedCrop`和`RandomHorizontalFlip`，首先在[3/4-4/3]中随机挑选一个比例进行resize，然后再[0.08-1]之间随机选择一个尺寸进行crop，最后在resize到输入大小，然后在随机水平翻转。
+`test_tfms`就是直接将图片resize到了输入的大小。
+
+下面是我们通过数据增广的三个例子
+
+<div align=center>
+<img src='assets/image_aug.png' width='500'>
+</div>
+
+最后我们将输入的像素点标准化到[0, 1]之间，然后用 ImageNet 的均值和方差做标准化
+```
+mean = [0.485, 0.456, 0.406]
+std = [0.229, 0.224, 0.225]
+```
+
+## 数据读取
+我们在`datasets.py`中自定义了一个数据类，这是一个继承于 PyTorch `Dataset` 的子类，我们用来定义训练集和测试集，只需要定义`__len__`表示数据一共有多少， 和 `__getitem__`表示取出其中第 `i` 个数据点。
+
+接着我们使用 PyTorch 中的 `DataLoader` 进行数据读取，这能够帮助我们方便的实现一个 `batch` 数据的读取，同时还能够利用python的多进程加快读取速度，其中 `num_workers`就是控制python进程数目。除此之外，还有一个参数是 `pin_memroy`，如果设置为 `True`，那么数据将会存放在锁业内存中，这样转换成GPU上的显存速度就会更快，如果电脑性能较差，可以设置为 `False`，将数据存放在虚拟内存中。
+
+## 模型
+我们再 `model.py` 中定义了输入的模型 `ResNet50`，通过 `net.fc = nn.Linear(net.fc.in_features, classes)` 实现了最后一层的替换。
 
 # Training
-
-
-## 训练 baseline
-运行下面的代码
+我们的训练脚本都在 `train.py` 中实现了，通过运行下面的代码
 
 ```bash
 python train.py 
 ```
 
-就可以进行baseline训练, 这次提供的baseline是模块化的代码，所有的配置文件都在`core/config.py`中，大家可以自己去查看，同时因为数据和模型比较大，这次代码只支持GPU训练，在训练过程中，会自动创建`checkpoints`文件夹，训练的模型会自动保存在`checkpoints`中。
+就可以进行baseline训练, 在训练过程中，会自动创建`logs/tmp`文件夹，训练的模型会自动保存在`logs/tmp/models`中。
+
+损失函数我们使用的是交叉熵`nn.CrossEntropyLoss()`, 优化器选用了 `Adam`，学习率初始为`0.1`，一共训练`120`epochs，分别在`60`和`90`次进行学习率的0.1倍的衰减，`weight_decay` 选择了 `5e-4`。
+
+所有的模型训练参数都可以在 `main` 函数的 `parser` 中查看。
 
 # Evaluation
+我们的测试脚本在 `submission.py` 中实现了，通过载入训练好的模型，输入所有测试集的数据，经过模型得到预测的结果，然后进行结果的提交。
 
-
-## 提交结果
-训练完成 baseline 之后，我们的模型会保存在 `checkpoints` 中，我们可以 load 我们想要的模型，进行结果的提交，运行下面的代码
+运行下面的代码
 
 ```
 python submission.py --model_path='logs/tmp/model/model_best.pth' 
@@ -121,5 +169,15 @@ python submission.py --model_path='logs/tmp/model/model_best.pth'
 <img src='https://ws1.sinaimg.cn/large/006tNbRwly1fwdozwppbuj31iq0c2jry.jpg' width='800'>
 </div>
 
+通过这个结果可以判断你的模型性能的好坏。
 
 # Inference
+我们的推理脚本在 `inference.py` 中实现了，首先在开头载入训练好的模型，然后可以使用 `classify_plant()` 函数进行图片的预测。
+
+```python
+img_path = 'path/to/image'
+origin_image = PIL.Image.open(img_path).convert('RGB')
+
+pred_label, scores = classify_plant(origin_image)
+```
+通过这个函数就可以得到模型对输入图片预测的结果以及预测的置信度。

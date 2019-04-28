@@ -13,7 +13,6 @@ import numpy as np
 # split train and valid list
 def split_dataset(root_path, split_ratio):
     train_path = os.path.join(root_path, 'train')
-    test_path = os.path.join(root_path, 'test')
     train_labels = os.listdir(train_path)
     name2label = dict((j, i) for i, j in enumerate(train_labels))
     label2name = dict((j, i) for i, j in name2label.items())
