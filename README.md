@@ -21,12 +21,6 @@
 
 [**Implementation**](https://github.com/L1aoXingyu/a-PyTorch-Tutorial-to-Transfer-Learning#implementation)
 
-[**Training**](https://github.com/L1aoXingyu/a-PyTorch-Tutorial-to-Transfer-Learning#training)
-
-[**Evaluation**](https://github.com/L1aoXingyu/a-PyTorch-Tutorial-to-Transfer-Learning#evaluation)
-
-[**Inference**](https://github.com/L1aoXingyu/a-PyTorch-Tutorial-to-Transfer-Learning#inference)
-
 
 # Objective
 我们需要训练一个卷积神经网络来识别不同的植物种类。
