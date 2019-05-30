@@ -9,10 +9,9 @@ from torchvision.models import *
 
 
 def get_resnet50(classes, pretrain=True):
-    if pretrain:
-        net = resnet50(pretrained=True)
-    else:
-        net = resnet50()
+    net = resnet50(pretrained=pretrain)
+    # for p in net.parameters():
+    #     p.requires_grad_(False)
     net.avgpool = nn.AdaptiveAvgPool2d(1)
     net.fc = nn.Linear(net.fc.in_features, classes)
     return net

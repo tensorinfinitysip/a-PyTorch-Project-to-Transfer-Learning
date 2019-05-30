@@ -1,10 +1,15 @@
-这是一个 [PyTorch](https://pytorch.org/) 的教程: a PyTorch Tutorial to Transfer Learning
+这是一个 [PyTorch](https://pytorch.org/) 的项目: a PyTorch Tutorial to Transfer Learning
 
-这是 [a series of projects]() 中的第一个项目，从这个项目中我们会学习到如何使用迁移学习完成这个很棒的图像分类项目。
+这是 [a series of pytorch projects](https://github.com/L1aoXingyu/a-series-of-pytorch-projects) 中的第一个项目，从这个项目中我们会学习到如何使用迁移学习完成这个很棒的图像分类项目。
 
 需要大家了解 PyTorch 的基本知识，同时要掌握卷积神经网络的知识。
 
 项目使用 `PyTorch 1.0` 和 `python3.7`
+
+**项目要求**:  
+1. 找到代码中 `TODO` 部分，完成代码的内容，并训练网络
+2. （可选）根据项目代码，自己从头写一个相似的项目作为练习
+3. （可选）自己上网查阅或是阅读文章中[技巧](https://mp.weixin.qq.com/s/ANbD77zytD58bTwuXTvqjw)，对项目进行优化得到更好的结果
 
 # 目录
 
@@ -31,15 +36,15 @@
 下面是几个例子，训练好的网络在测试集上的结果
 
 <div align=center>
-<img src='assets/demo1.png' width='800'>
+<img src='assets/demo1.png' width='600'>
 </div>
 
 <div align=center>
-<img src='assets/demo2.png' width='800'>
+<img src='assets/demo2.png' width='600'>
 </div>
 
 <div align=center>
-<img src='assets/demo3.png' width='800'>
+<img src='assets/demo3.png' width='600'>
 </div>
 
 # Concepts
@@ -73,38 +78,36 @@ $$
 </div>
 
 # Overview
-在这个部分，我们展示一下整体的模型结构，如果你很熟悉这个部分，你可以直接跳到[implementation](https://github.com/L1aoXingyu/a-PyTorch-Tutorial-to-Transfer-Learning#implementation)
+在这个部分，我们展示一下项目整体的逻辑和训练过程，帮助大家熟悉整个项目结构，如果你很熟悉这个部分，你可以直接跳到[implementation](https://github.com/L1aoXingyu/a-PyTorch-Tutorial-to-Transfer-Learning#implementation)
 
-## Base Convolutions
-首先，我们使用目前存在的神经网络结构作为例子，这里我们使用 ResNet50 作为例子，也可以尝试使用不同的网络结构。
-
+1. **定义数据读取**。对于所有的任务，第一步都需要熟悉任务的数据是什么样的类型，以及任务如何来读取数据，同时还要确定数据有哪些预处理，所以我们的第一步操作是定义数据读入，数据读入代码在 `dataset.py` 中，数据预处理的代码在 `train.py` 中。
+2. **定义网络结构**。定义完数据相关的函数和类之后，我们需要定义适应于这个任务的模型，这是一个分类任务，所以可以使用常见的分类模型，比如 ResNet，InceptionNet 等等，选择好模型之后，需要根据任务修改最后的全连接层。
 <div align=center>
 <img src='assets/resnet.png' width='400'>
 </div>
 
-我们会保留完整的网络结构，除了最后一层，我们会用一个新的全连接层去替换最后一层，实现我们需要的分类效果。
+3. **定义优化器和需要优化的参数**。在训练网络的时候，需要选择哪些参数需要更新，哪些参数固定不变，在 finetune 中，有三种基本的参数更新方式，一种是全部参数进行更新，一种是只更新最后一层全连接层的参数，一种是将卷积层的学习率设为全连接层的0.1或者0.01。然后需要选择一种梯度更新的方式，有标准的梯度下降法，也就大量的自适应梯度下降法。
 
-## Loss 函数
-对于分类问题，我们使用最常用的交叉熵损失函数，公式如下
+4. **定义任务的损失函数**。定义好需要的优化参数之后，需要定义损失函数来计算梯度，这里的损失函数是分类的损失函数，公式如下          
 
 $$
 l_{CE} = - \sum_{i=1}^C t_i \log (y_i)
 $$
-
 其中 $y_i$ 是softmax之后的结果，$t_i$ 是 one-hot 的真实label。
 
-## 处理预测过程
-在网络的预测过程中，我们将图片输入到网络中，最后可以得到一个k-维向量，这个向量表示每个分类的得分，我们只需要取里面得分最大的下标作为预测的label即可，注意这里的向量每个元素求和并不等于1，如果要等于1，需要对向量进行softmax操作。
+5. **定义网络的训练逻辑**。这是一个分类任务，训练的逻辑可以用标准的随机梯度下降法，首先通过前向传播和损失函数的计算得到模型目前的 loss，然后通过反向传播得到可训练参数的梯度，最后通过梯度下降进行参数的更新，这样就完成了一次迭代。
+
+6. **定义网络的测试和预测逻辑**。在网络的预测过程中，我们将图片输入到网络中，最后可以得到一个k-维向量，这个向量表示每个分类的得分，我们只需要取里面得分最大的下标作为预测的 label 即可，然后可以计算验证集的分类准确率，注意这里的向量每个元素求和并不等于 1，如果要等于 1，需要对向量进行 softmax 操作。
 
 # Implementation
 ## 数据准备
 通过[比赛界面](https://www.kaggle.com/c/plant-seedlings-classification/data)根据图片中的显示进行数据下载
 
 <div align=center>
-<img src='https://ws4.sinaimg.cn/large/006tNbRwly1fwdo7019xfj31kw13owgy.jpg' width='800'>
+<img src='assets/kaggle.jpg' width='600'>
 </div>
 
-然后在项目的根目录中创建`datasets`文件夹，将下载好`train.zip`和`test.zip`文件放入`datasets`中
+然后在项目的根目录中创建 `datasets` 文件夹，将下载好 `train.zip` 和 `test.zip` 文件放入 `datasets` 中
 
 里面一共有12种不同的植物信息
 ```python
@@ -114,50 +117,32 @@ $$
 通过 `utils/create_data_lists.py` 中的函数，我们可以按照比例将有标注的图片分成训练集和验证集，他们都是以`list`的方式存在，每个元素包含着图片的路径和对应的label，同时会得到一个字典`label2name`，里面包含着`0 ~ 11`这 12 个数字分别对应的具体上面的标签。
 
 ## 输入
-我们将图片都 resize 到 `224, 224` 作为网络的输入，同时每张图片的读入都是 RBG 的格式。
+在图片输入之前，需要通过 resize 操作将不同大小的图片都变成同一个大小，这样才能够组成一个 batch 输入到网络当中，一般我们可以 resize 到 `224, 224` 或者是 `299, 299` 作为网络的输入。
 
-接着我们通过一系列数据增广的操作，比如随机裁剪，随机翻转等等，更多的增广方法具体看一看`torchvision.transforms`中的函数。
+接着需要通过一系列数据增广的操作使得数据更加的多样化，比如随机裁剪，随机翻转等等，更多的增广方法具体看一看`torchvision.transforms`中的函数。
 我们的数据增广定义在 `train.py` 中定义了`train_tfms`和`test_tfms`作为训练集和测试集的数据增广。
-`train_tfms`主要使用了`RandomResizedCrop`和`RandomHorizontalFlip`，首先在[3/4-4/3]中随机挑选一个比例进行resize，然后再[0.08-1]之间随机选择一个尺寸进行crop，最后在resize到输入大小，然后在随机水平翻转。
-`test_tfms`就是直接将图片resize到了输入的大小。
-
-下面是我们通过数据增广的三个例子
-
-<div align=center>
-<img src='assets/image_aug.png' width='500'>
-</div>
-
-最后我们将输入的像素点标准化到[0, 1]之间，然后用 ImageNet 的均值和方差做标准化
-```
-mean = [0.485, 0.456, 0.406]
-std = [0.229, 0.224, 0.225]
-```
 
 ## 数据读取
-我们在`datasets.py`中自定义了一个数据类，这是一个继承于 PyTorch `Dataset` 的子类，我们用来定义训练集和测试集，只需要定义`__len__`表示数据一共有多少， 和 `__getitem__`表示取出其中第 `i` 个数据点。
+需要在 `datasets.py` 中自定义了一个数据类，这是一个继承于 PyTorch `Dataset` 的子类，我们用来定义训练集和测试集，只需要定义`__len__`表示数据一共有多少， 和 `__getitem__`表示取出其中第 `i` 个数据点。
 
 接着我们使用 PyTorch 中的 `DataLoader` 进行数据读取，这能够帮助我们方便的实现一个 `batch` 数据的读取，同时还能够利用python的多进程加快读取速度，其中 `num_workers`就是控制python进程数目。除此之外，还有一个参数是 `pin_memroy`，如果设置为 `True`，那么数据将会存放在锁业内存中，这样转换成GPU上的显存速度就会更快，如果电脑性能较差，可以设置为 `False`，将数据存放在虚拟内存中。
 
 ## 模型
-我们再 `model.py` 中定义了输入的模型 `ResNet50`，通过 `net.fc = nn.Linear(net.fc.in_features, classes)` 实现了最后一层的替换。
+下面需要在 `model.py` 中定义了输入的模型，这里可以使用任何的预训练模型，可以查看 `torchvision.models` 里面的模型，记得将最后的全连接层进行修改。
 
-# Training
-我们的训练脚本都在 `train.py` 中实现了，通过运行下面的代码
+## Training
+训练相关的函数和代码都在 `train.py` 中，需要同学们实现训练的基本逻辑，代码完成之后，通过运行下面的代码
 
 ```bash
 python train.py 
 ```
 
-就可以进行baseline训练, 在训练过程中，会自动创建`logs/tmp`文件夹，训练的模型会自动保存在`logs/tmp/models`中。
+就可以进行模型的训练了。 在训练过程中，会自动创建`logs/tmp`文件夹，训练的模型会自动保存在`logs/tmp/models`中。
 
-损失函数我们使用的是交叉熵`nn.CrossEntropyLoss()`, 优化器选用了 `Adam`，学习率初始为`0.1`，一共训练`120`epochs，分别在`60`和`90`次进行学习率的0.1倍的衰减，`weight_decay` 选择了 `5e-4`。
+## Evaluation
+测试代码都在 `submission.py` 中，需要实现剩余的代码，通过载入训练好的模型，输入所有测试集的数据，经过模型得到预测的结果，然后进行结果的提交。
 
-所有的模型训练参数都可以在 `main` 函数的 `parser` 中查看。
-
-# Evaluation
-我们的测试脚本在 `submission.py` 中实现了，通过载入训练好的模型，输入所有测试集的数据，经过模型得到预测的结果，然后进行结果的提交。
-
-运行下面的代码
+完成代码的补全之后，通过运行下面的代码
 
 ```
 python submission.py --model_path='logs/tmp/model/model_best.pth' 
@@ -171,8 +156,8 @@ python submission.py --model_path='logs/tmp/model/model_best.pth'
 
 通过这个结果可以判断你的模型性能的好坏。
 
-# Inference
-我们的推理脚本在 `inference.py` 中实现了，首先在开头载入训练好的模型，然后可以使用 `classify_plant()` 函数进行图片的预测。
+## Inference
+我们的预测代码在 `inference.py` 中实现，补全 `classify_plant()` 中的代码，然后通过运行下面的代码就可以进行图片的预测了。
 
 ```python
 img_path = 'path/to/image'

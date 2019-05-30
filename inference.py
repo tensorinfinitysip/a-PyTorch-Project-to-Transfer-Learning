@@ -17,7 +17,7 @@ state_dict = checkpoint['state_dict']
 label2name = checkpoint['label2name']
 network = get_resnet50(len(label2name), pretrain=False)
 network.load_state_dict(state_dict)
-network.to(device)
+network = network.to(device)
 network.eval()
 
 resize = T.Resize((224, 224))
@@ -31,7 +31,7 @@ def classify_plant(image):
     image = totensor(image)
     image = normalize(image)
     image = image.unsqueeze(0)  # add an axial to [1, 3, 224, 224]
-    image.to(device)
+    image = image.to(device)
     with torch.no_grad():
         scores = network(image)
     pred_label = label2name[scores.max(1)[1].item()]
