@@ -13,10 +13,17 @@ class ImageDataset(Dataset):
         self.transforms = transforms
 
     def __getitem__(self, item):
-        img_path, label = self.img_list[item]
-        img = Image.open(img_path).convert('RGB')
-        img = self.transforms(img)
-        return img, label
+        #########################################################################
+        # TODO:
+        # 根据 item 实现对应数据和label的读入，同时对图像进行预处理和数据增强            #
+        #                                                                       #
+        # 提示: 可以使用 PIL 从硬盘中读入图片, 并且记住要转换成 RGB 的模式              #
+        # 同时注意类初始化中的定义                                                  #
+        #########################################################################
+        pass
+        #########################################################################
+        #                       END OF YOUR CODE                                #
+        #########################################################################
 
     def __len__(self):
         return len(self.img_list)
