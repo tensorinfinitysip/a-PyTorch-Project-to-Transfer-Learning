@@ -58,7 +58,7 @@
 - **softmax** 在数学上softmax也被称为归一化指数函数，是logistic函数从2维到高维的一个推广，能将任何实数k维向量z归一化到另外一个k维实向量$\sigma(z)$，使得向量中每一个元素都在(0, 1)之间，并且所有元素的求和为1。该函数通常的数学公式如下
 
 $$
-\sigma(z)_j = \frac{e^{z_j}}{\sum_{k=1}^K e^{z_K}} \quad for j = 1, \cdots, K
+\sigma(z)_j = \frac{e^{z_j}}{\sum_{k=1}^K e^{z_K}} \  for j = 1, \cdots, K
 $$
 
 <div align=center>
