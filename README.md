@@ -13,13 +13,13 @@
 
 # 目录
 
-[**Objective**](https://github.com/L1aoXingyu/a-PyTorch-Tutorial-to-Transfer-Learning#objective)
+[**Objective**](https://github.com/tensorinfinitysip/a-PyTorch-Project-to-Transfer-Learning#objective)
 
-[**Concepts**](https://github.com/L1aoXingyu/a-PyTorch-Tutorial-to-Transfer-Learning#concepts)
+[**Concepts**](https://github.com/tensorinfinitysip/a-PyTorch-Project-to-Transfer-Learning#concepts)
 
-[**Overview**](https://github.com/L1aoXingyu/a-PyTorch-Tutorial-to-Transfer-Learning#overview)
+[**Overview**](https://github.com/tensorinfinitysip/a-PyTorch-Project-to-Transfer-Learning#overview)
 
-[**Implementation**](https://github.com/L1aoXingyu/a-PyTorch-Tutorial-to-Transfer-Learning#implementation)
+[**Implementation**](https://github.com/tensorinfinitysip/a-PyTorch-Project-to-Transfer-Learning#implementation)
 
 
 # Objective
