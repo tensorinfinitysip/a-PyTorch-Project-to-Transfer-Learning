@@ -1,4 +1,4 @@
-这是一个 [PyTorch](https://pytorch.org/) 的项目: a PyTorch Tutorial to Transfer Learning
+这是一个 [PyTorch](https://pytorch.org/) 的项目: a PyTorch Project to Transfer Learning
 
 这是 [a series of pytorch projects](https://github.com/L1aoXingyu/a-series-of-pytorch-projects) 中的第一个项目，从这个项目中我们会学习到如何使用迁移学习完成这个很棒的图像分类项目。
 
