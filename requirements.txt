@@ -1,5 +1,5 @@
 easydict==1.8
 pandas==0.23.4
-torch==1.0.1
+torch==2.2.0
 torchvision==0.2.1
 
